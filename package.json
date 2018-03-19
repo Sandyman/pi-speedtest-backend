@@ -1,5 +1,5 @@
 {
-  "name": "isp-check-sls",
+  "name": "pi-speedtest-backend",
   "version": "0.0.1",
   "description": "Backend for ISP speed test",
   "main": "index.js",
