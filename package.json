@@ -1,0 +1,14 @@
+{
+  "name": "isp-check-sls",
+  "version": "0.0.1",
+  "description": "Backend for ISP speed test",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "fs-extra": "^5.0.0"
+  }
+}
