@@ -8,16 +8,49 @@ provider:
   memorySize: 128
   timeout: 15
   deploymentBucket: sls-depl-${self:provider.region}-${self:provider.stage}
+  iamRoleStatements:
+    - Effect: Allow
+      Action: dynamodb:PutItem
+      Resource: { "Fn::Join" : [ ":", [ "arn:aws:dynamodb:${self:provider.region}", { "Ref" : "AWS::AccountId" }, "table/${self:custom.sampleTableName}" ] ] }
+  environment:
+    JWT_SECRET: ${self:custom.config.JWT_SECRET}
+    SAMPLE_TABLE: ${self:custom.sampleTableName}
 
 functions:
-  hello:
-    handler: index.handler
+  postSample:
+    handler: index.postSample
     events:
       - http:
           path: sample
           cors: true
           method: post
-          authorizer:
+          authorizer: authorizer
+
+  authorizer:
+    handler: auth.authoriser
+
+resources:
+  Resources:
+    SamplesTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        TableName: ${self:custom.sampleTableName}
+        AttributeDefinitions:
+          - AttributeName: "id"
+            AttributeType: "S"
+          - AttributeName: "created"
+            AttributeType: "S"
+        KeySchema:
+          - AttributeName: "id"
+            KeyType: "HASH"
+          - AttributeName: "created"
+            KeyType: "RANGE"
+        ProvisionedThroughput:
+          ReadCapacityUnits: "1"
+          WriteCapacityUnits: "1"
+        TimeToLiveSpecification:
+          AttributeName: expires
+          Enabled: true
 
 custom:
   defaultStage: dev
@@ -25,3 +58,5 @@ custom:
     dev: development
     prod: production
   common: ${file(./common.json)}
+  config: ${file(./config.json)}
+  sampleTableName: ${self:custom.common.sampleTable}

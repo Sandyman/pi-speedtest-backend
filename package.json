@@ -9,6 +9,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "fs-extra": "^5.0.0"
+    "fs-extra": "^5.0.0",
+    "jsonwebtoken": "^8.2.0",
+    "moment": "^2.21.0"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.211.0"
   }
 }
