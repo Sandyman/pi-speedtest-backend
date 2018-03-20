@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-if (!process.env.JWT_TOKEN) {
+if (!process.env.JWT_SECRET) {
   console.log('Environment variable JWT_SECRET with secret key is required');
 }
 
