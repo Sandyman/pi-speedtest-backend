@@ -13,17 +13,17 @@ const SAMPLE_TABLE = process.env.SAMPLE_TABLE;
 const putSample = (id, sample) => new Promise((resolve, reject) => {
   const created = moment();
   const timestamp = created.toISOString();
-  const expires = created.add(30, 'days');
   const params = {
     TableName: SAMPLE_TABLE,
     Item: {
       id,
       created: created.unix().toString(),
-      expires: expires.unix(),
+      expires: created.add(30, 'days').unix(),
       sample,
       timestamp,
     }
   };
+  console.log(JSON.stringify(params, null, 3));
   dbClient.put(params, err => {
     if (err) return reject(err);
 
