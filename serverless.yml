@@ -11,10 +11,13 @@ provider:
   iamRoleStatements:
     - Effect: Allow
       Action: dynamodb:PutItem
-      Resource: { "Fn::Join" : [ ":", [ "arn:aws:dynamodb:${self:provider.region}", { "Ref" : "AWS::AccountId" }, "table/${self:custom.sampleTableName}" ] ] }
+      Resource:
+        - { "Fn::Join" : [ ":", [ "arn:aws:dynamodb:${self:provider.region}", { "Ref" : "AWS::AccountId" }, "table/${self:custom.sampleTable}" ] ] }
+        - { "Fn::Join" : [ ":", [ "arn:aws:dynamodb:${self:provider.region}", { "Ref" : "AWS::AccountId" }, "table/${self:custom.userTable}" ] ] }
   environment:
     JWT_SECRET: ${self:custom.config.JWT_SECRET}
-    SAMPLE_TABLE: ${self:custom.sampleTableName}
+    SAMPLE_TABLE: ${self:custom.sampleTable}
+    USER_TABLE: ${self:custom.userTable}
 
 functions:
   postSample:
@@ -31,10 +34,24 @@ functions:
 
 resources:
   Resources:
+    UserTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        TableName: ${self:custom.userTable}
+        AttributeDefinitions:
+          - AttributeName: "id"
+            AttributeType: "S"
+        KeySchema:
+          - AttributeName: "id"
+            KeyType: "HASH"
+        ProvisionedThroughput:
+          ReadCapacityUnits: "1"
+          WriteCapacityUnits: "1"
+
     SamplesTable:
       Type: "AWS::DynamoDB::Table"
       Properties:
-        TableName: ${self:custom.sampleTableName}
+        TableName: ${self:custom.sampleTable}
         AttributeDefinitions:
           - AttributeName: "id"
             AttributeType: "S"
@@ -59,4 +76,5 @@ custom:
     prod: production
   common: ${file(./common.json)}
   config: ${file(./config.json)}
-  sampleTableName: ${self:custom.common.sampleTable}
+  sampleTable: ${self:custom.common.sampleTable}
+  userTable: ${self:custom.common.userTable}

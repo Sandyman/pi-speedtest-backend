@@ -1,3 +1,4 @@
 {
-  "sampleTable": "Samples"
+  "sampleTable": "Samples",
+  "userTable": "PiUsers"
 }
