@@ -1,5 +1,6 @@
 class Sample {
-  constructor({speeds, client, server}) {
+  constructor({ sample }) {
+    const { speeds, client, server } = sample;
     this.upload = speeds.upload;
     this.download = speeds.download;
     this.ping = server.ping;
