@@ -1,12 +1,14 @@
 # package directories
 node_modules
-jspm_packages
 
 # Serverless directories
 .serverless
 
+# IDEA directory
 .idea
 
+# We don't want to check in the configuration
 config.json
 
+# Joe backup files
 *~
