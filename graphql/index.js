@@ -30,8 +30,5 @@ module.exports.runGraphQL = (event, ctx, done) => {
   console.log(JSON.stringify(ctx, null, 3));
 
   return graphql(schema, query, root, ctx, variables)
-    .then(r => {
-      console.log(r);
-      return done(r);
-    });
+    .then(done);
 };

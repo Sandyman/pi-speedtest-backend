@@ -1,4 +1,3 @@
-const getSamplesById =  require('../db').getSamples;
 const Sample = require('./sample');
 
 /**
@@ -6,8 +5,8 @@ const Sample = require('./sample');
  */
 const root = {
   getSamples: (args, ctx) => {
-    const { id } = ctx;
-    return getSamplesById(id)
+    const { db, id } = ctx;
+    return db.getSamples(id)
       .then(r => r.map(v => new Sample(v)));
   },
 };
