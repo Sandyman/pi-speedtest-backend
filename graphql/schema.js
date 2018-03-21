@@ -12,7 +12,7 @@ const schema = buildSchema(`
   }
   
   type Query {
-    getSamples: [Sample]!
+    getSamples: [Sample]
   }
 `);
 

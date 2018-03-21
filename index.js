@@ -1,10 +1,9 @@
 const authorizer = require('./auth/graphql');
-const db = require('./db');
 const graphql = require('./graphql');
 const headers = require('./headers');
 
 /**
- *
+ * Handler for graphql endpoint
  * @param event
  * @param context
  * @param callback
@@ -16,7 +15,6 @@ const handler = (event, context, callback) => {
 
   // Create context to pass to graphql server
   const ctx = {
-    db,
     id: principalId,
   };
 

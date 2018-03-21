@@ -1,15 +1,15 @@
-const _ = require('underscore');
+const getSamplesById =  require('../db').getSamples;
 const Sample = require('./sample');
 
 /**
  * Root resolvers
  */
 const root = {
-  getSamples: (obj, args, context) => {
-    const { db, id } = context;
-    return db.getSamples(id)
-      .then(r => _.map(r, v => new Sample(v)));
-  }
+  getSamples: (args, ctx) => {
+    const { id } = ctx;
+    return getSamplesById(id)
+      .then(r => r.map(v => new Sample(v)));
+  },
 };
 
 module.exports = root;
