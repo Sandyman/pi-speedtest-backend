@@ -6,6 +6,26 @@ const dbClient = new AWS.DynamoDB.DocumentClient();
 const SAMPLE_TABLE = process.env.SAMPLE_TABLE;
 
 /**
+ * Get samples from database
+ * @param id
+ */
+const getSamples = id => new Promise((resolve, reject) => {
+  const params = {
+    TableName: SAMPLE_TABLE,
+    KeyConditionExpression: 'id = :id',
+    ExpressionAttributeValues: {
+      ':id': id,
+    }
+  };
+  console.log(JSON.stringify(params, null, 3));
+  dbClient.query(params, function(err, data) {
+    if (err) return reject(err);
+
+    return resolve(data.Items);
+  });
+});
+
+/**
  * Put sample in database
  * @param id
  * @param sample
@@ -32,5 +52,6 @@ const putSample = (id, sample) => new Promise((resolve, reject) => {
 });
 
 module.exports = {
+  getSamples,
   putSample,
 };

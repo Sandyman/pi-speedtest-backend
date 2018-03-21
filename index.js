@@ -1,41 +1,33 @@
+const authorizer = require('./auth/graphql');
 const db = require('./db');
+const graphql = require('./graphql');
+const headers = require('./headers');
 
 /**
- * Post a single sample
+ *
  * @param event
  * @param context
  * @param callback
  */
-module.exports.postSample = (event, context, callback) => {
+const handler = (event, context, callback) => {
   console.log(JSON.stringify(event, null, 3));
 
   const principalId = event.requestContext.authorizer.principalId;
-  const body = JSON.parse(event.body);
 
-  console.log(JSON.stringify(body, null, 3));
+  // Create context to pass to graphql server
+  const ctx = {
+    db,
+    id: principalId,
+  };
 
-  db.putSample(principalId, body.data)
-    .then(() => {
-      return callback(null, {
-        statusCode: 200,
-        body: JSON.stringify('OK'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Credentials': true,
-        }
-      });
-    })
-    .catch(err => {
-      console.log(err);
-      return callback(null, {
-        statusCode: 400,
-        body: JSON.stringify('ERR'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Credentials': true,
-        }
-      });
-    });
+  graphql.runGraphQL(event, ctx, result => callback(null, {
+    statusCode: 200,
+    body: JSON.stringify(result),
+    headers,
+  }));
+};
+
+module.exports = {
+  authorizer,
+  graphql: handler,
 };

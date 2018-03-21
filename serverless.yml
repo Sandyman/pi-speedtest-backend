@@ -15,22 +15,35 @@ provider:
         - { "Fn::Join" : [ ":", [ "arn:aws:dynamodb:${self:provider.region}", { "Ref" : "AWS::AccountId" }, "table/${self:custom.sampleTable}" ] ] }
         - { "Fn::Join" : [ ":", [ "arn:aws:dynamodb:${self:provider.region}", { "Ref" : "AWS::AccountId" }, "table/${self:custom.userTable}" ] ] }
   environment:
+    GQL_SECRET: ${self:custom.config.GQL_SECRET}
     JWT_SECRET: ${self:custom.config.JWT_SECRET}
     SAMPLE_TABLE: ${self:custom.sampleTable}
     USER_TABLE: ${self:custom.userTable}
 
 functions:
   postSample:
-    handler: index.postSample
+    handler: samples.postSample
     events:
       - http:
           path: sample
           cors: true
           method: post
-          authorizer: authorizer
+          authorizer: sampleAuthorizer
 
-  authorizer:
-    handler: auth.authoriser
+  graphql:
+    handler: index.graphql
+    events:
+      - http:
+          path: graphql
+          method: post
+          cors: true
+          authorizer: graphqlAuthorizer
+
+  sampleAuthorizer:
+    handler: samples.authorizer
+
+  graphqlAuthorizer:
+    handler: index.authorizer
 
 resources:
   Resources:

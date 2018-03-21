@@ -10,8 +10,11 @@
   "license": "ISC",
   "dependencies": {
     "fs-extra": "^5.0.0",
+    "graphql": "^0.13.2",
     "jsonwebtoken": "^8.2.0",
-    "moment": "^2.21.0"
+    "moment": "^2.21.0",
+    "request": "^2.85.0",
+    "underscore": "^1.8.3"
   },
   "devDependencies": {
     "aws-sdk": "^2.211.0"
