@@ -21,10 +21,12 @@ provider:
         - dynamodb:*
       Resource:
         - { "Fn::Join" : [ ":", [ "arn:aws:dynamodb:${self:provider.region}", { "Ref" : "AWS::AccountId" }, "table/${self:custom.accessTokenTable}" ] ] }
+        - { "Fn::Join" : [ ":", [ "arn:aws:dynamodb:${self:provider.region}", { "Ref" : "AWS::AccountId" }, "table/${self:custom.sampleTokenTable}" ] ] }
   environment:
     GQL_SECRET: ${self:custom.config.GQL_SECRET}
     JWT_SECRET: ${self:custom.config.JWT_SECRET}
     SAMPLE_TABLE: ${self:custom.sampleTable}
+    SAMPLE_TOKEN_TABLE: ${self:custom.sampleTokenTable}
     USER_TABLE: ${self:custom.userTable}
 
 functions:
@@ -89,6 +91,20 @@ resources:
           AttributeName: expires
           Enabled: true
 
+    sampleTokenTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        TableName: ${self:custom.sampleTokenTable}
+        AttributeDefinitions:
+          - AttributeName: "id"
+            AttributeType: "S"
+        KeySchema:
+          - AttributeName: "id"
+            KeyType: "HASH"
+        ProvisionedThroughput:
+          ReadCapacityUnits: "1"
+          WriteCapacityUnits: "1"
+
     UserTable:
       Type: "AWS::DynamoDB::Table"
       Properties:
@@ -112,4 +128,5 @@ custom:
   config: ${file(./config.json)}
   accessTokenTable: ${self:custom.common.accessTokenTable}
   sampleTable: ${self:custom.common.sampleTable}
+  sampleTokenTable: ${self:custom.common.sampleTokenTable}
   userTable: ${self:custom.common.userTable}

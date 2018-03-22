@@ -12,4 +12,14 @@ class Sample {
   }
 }
 
-module.exports = Sample;
+class SampleToken {
+  constructor({ token, status }) {
+    this.contents = token;
+    this.status = status || 'EXISTING';
+  }
+}
+
+module.exports = {
+  Sample,
+  SampleToken,
+};

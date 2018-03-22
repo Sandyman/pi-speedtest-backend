@@ -12,8 +12,23 @@ const schema = buildSchema(`
     cc: String!
   }
   
+  enum Status {
+    NEW
+    EXISTING
+  }
+  
+  type Token {
+    contents: String!
+    status: Status!  
+  }
+  
   type Query {
     getSamples: [Sample]
+    getToken: Token
+  }
+  
+  type Mutation {
+    createToken: Token!
   }
 `);
 

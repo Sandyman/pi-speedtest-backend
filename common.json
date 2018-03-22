@@ -1,5 +1,6 @@
 {
   "accessTokenTable": "Pi-AccessTokens",
   "sampleTable": "Pi-Samples",
+  "sampleTokenTable": "Pi-SampleTokens",
   "userTable": "Pi-Users"
 }

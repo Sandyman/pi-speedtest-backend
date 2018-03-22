@@ -12,8 +12,12 @@ const isEmpty = require('lodash.isempty');
 module.exports.runGraphQL = (event, ctx, done) => {
   const body = JSON.parse(event.body);
 
+  // A query or a mutation. If neither: error.
+  let query = body.query || body.mutation;
+  if (!query) return done({ error: 'Could not find query nor mutation.' });
+
   // Remove newlines and collapse remaining whitespace
-  const query = body.query.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
+  query = query.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
 
   // Variables must be a map
   const variables = body.variables && !isEmpty(body.variables)
