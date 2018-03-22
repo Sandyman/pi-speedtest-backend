@@ -1,4 +1,4 @@
-const authoriser = require('./authoriser');
+const jwt = require('jsonwebtoken');
 
 if (!process.env.GQL_SECRET) {
   console.log('Environment variable JWT_SECRET with secret key is required');
@@ -21,9 +21,33 @@ const policy = {
 };
 
 /**
+ * Authorise graphql request
+ * @param event
+ * @param context
+ * @param callback
+ */
+const authoriser = (event, context, callback) => {
+  console.log(JSON.stringify(event, null, 3));
+
+  const authToken = event.authorizationToken;
+
+  if (event.type.toUpperCase() !== 'TOKEN') return callback('Authorisation not of type TOKEN');
+  if (!authToken) return callback('No Authorization header');
+  if (!authToken.startsWith('Bearer')) return callback('Invalid authorization header');
+
+  const token = authToken.replace(/^Bearer\s*/i, '');
+  return jwt.verify(token, secret, (err, payload) => {
+    if (!err && payload) {
+      return callback(null, { principalId: payload.sub, policyDocument: policy });
+    }
+    return callback(err);
+  });
+};
+
+/**
  * Authoriser
  * @param event
  * @param context
  * @param callback
  */
-module.exports = authoriser(secret, policy);
+module.exports = authoriser;
