@@ -1,4 +1,4 @@
-service: isp-check-sls
+service: pi-speedtest-sls
 
 provider:
   name: aws
@@ -16,6 +16,11 @@ provider:
       Resource:
         - { "Fn::Join" : [ ":", [ "arn:aws:dynamodb:${self:provider.region}", { "Ref" : "AWS::AccountId" }, "table/${self:custom.sampleTable}" ] ] }
         - { "Fn::Join" : [ ":", [ "arn:aws:dynamodb:${self:provider.region}", { "Ref" : "AWS::AccountId" }, "table/${self:custom.userTable}" ] ] }
+    - Effect: Allow
+      Action:
+        - dynamodb:*
+      Resource:
+        - { "Fn::Join" : [ ":", [ "arn:aws:dynamodb:${self:provider.region}", { "Ref" : "AWS::AccountId" }, "table/${self:custom.accessTokenTable}" ] ] }
   environment:
     GQL_SECRET: ${self:custom.config.GQL_SECRET}
     JWT_SECRET: ${self:custom.config.JWT_SECRET}
@@ -49,10 +54,10 @@ functions:
 
 resources:
   Resources:
-    UserTable:
+    AccessTokenTable:
       Type: "AWS::DynamoDB::Table"
       Properties:
-        TableName: ${self:custom.userTable}
+        TableName: ${self:custom.accessTokenTable}
         AttributeDefinitions:
           - AttributeName: "id"
             AttributeType: "S"
@@ -84,6 +89,20 @@ resources:
           AttributeName: expires
           Enabled: true
 
+    UserTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        TableName: ${self:custom.userTable}
+        AttributeDefinitions:
+          - AttributeName: "id"
+            AttributeType: "S"
+        KeySchema:
+          - AttributeName: "id"
+            KeyType: "HASH"
+        ProvisionedThroughput:
+          ReadCapacityUnits: "1"
+          WriteCapacityUnits: "1"
+
 custom:
   defaultStage: dev
   profiles:
@@ -91,5 +110,6 @@ custom:
     prod: production
   common: ${file(./common.json)}
   config: ${file(./config.json)}
+  accessTokenTable: ${self:custom.common.accessTokenTable}
   sampleTable: ${self:custom.common.sampleTable}
   userTable: ${self:custom.common.userTable}

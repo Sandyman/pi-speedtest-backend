@@ -1,4 +1,5 @@
 {
-  "sampleTable": "Samples",
-  "userTable": "PiUsers"
+  "accessTokenTable": "Pi-AccessTokens",
+  "sampleTable": "Pi-Samples",
+  "userTable": "Pi-Users"
 }
