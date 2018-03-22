@@ -11,18 +11,30 @@ const headers = require('./headers');
 const postSample = (event, context, callback) => {
   console.log(JSON.stringify(event, null, 3));
 
-  const principalId = event.requestContext.authorizer.principalId;
+  const { principalId, hashKey } = event.requestContext.authorizer;
   const body = JSON.parse(event.body);
 
   console.log(JSON.stringify(body, null, 3));
 
-  db.putSample(principalId, body.data)
-    .then(() => {
-      return callback(null, {
-        statusCode: 200,
-        body: JSON.stringify('OK'),
-        headers,
-      });
+  db.getSampleToken(principalId)
+    .then(t => {
+      if (t.hash !== hashKey) {
+        console.log('Invalid hash; probably an old token');
+        return callback(null, {
+          statusCode: 403,
+          body: JSON.stringify('Forbidden'),
+          headers,
+        });
+      }
+
+      return db.putSample(principalId, body.data)
+        .then(() => {
+          return callback(null, {
+            statusCode: 200,
+            body: JSON.stringify('OK'),
+            headers,
+          });
+        })
     })
     .catch(err => {
       console.log(err);

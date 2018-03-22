@@ -12,14 +12,8 @@ const schema = buildSchema(`
     cc: String!
   }
   
-  enum Status {
-    NEW
-    EXISTING
-  }
-  
   type Token {
-    contents: String!
-    status: Status!  
+    token: String!
   }
   
   type Query {

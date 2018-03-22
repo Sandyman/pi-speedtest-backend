@@ -13,9 +13,8 @@ class Sample {
 }
 
 class SampleToken {
-  constructor({ token, status }) {
-    this.contents = token;
-    this.status = status || 'EXISTING';
+  constructor({ token }) {
+    this.token = token;
   }
 }
 

@@ -4,10 +4,11 @@ const { Sample, SampleToken } = require('./sample');
 /**
  * Create a token
  * @param id
+ * @param hash
  */
-const createToken = id => {
+const createToken = (id, hash) => {
   const encrypt = crypto.createCipher('aes256', new Buffer(process.env.JWT_SECRET));
-  let encrypted = encrypt.update(`XPI:${id}`, 'utf8', 'hex');
+  let encrypted = encrypt.update(`XPI:${id}:${hash}`, 'utf8', 'hex');
   encrypted += encrypt.final('hex');
   return encrypted;
 };
@@ -17,17 +18,11 @@ const createToken = id => {
  * @param db
  * @param id
  */
-const createSampleToken = (db, id) => new Promise((resolve, reject) => db.getSampleToken(id)
-  .then(t => {
-    console.log(JSON.stringify(t, null, 3));
-    if (t) return resolve({ token: t.token, status: 'EXISTING' });
-
-    console.log('New token:');
-    const token = createToken(id);
-    console.log(token);
-    return db.putSampleToken(id, token)
-      .then(s => resolve({ token: s.token, status: 'NEW' }));
-  }));
+const createSampleToken = (db, id) => new Promise((resolve, reject) => {
+  const hash = Math.random().toString(36).substring(2, 8).toUpperCase();
+  const token = createToken(id, hash);
+  return db.putSampleToken(id, token, hash).then(() => resolve({ token }));
+});
 
 /**
  * Root resolvers
@@ -35,22 +30,19 @@ const createSampleToken = (db, id) => new Promise((resolve, reject) => db.getSam
 const root = {
   getSamples: (args, ctx) => {
     const { db, id } = ctx;
-    return db.getSamples(id)
-      .then(r => r.map(v => new Sample(v)));
+    return db.getSamples(id).then(r => r.map(v => new Sample(v)));
   },
 
   getToken: (args, ctx) => {
     const { db, id } = ctx;
 
-    return db.getSampleToken(id)
-      .then(t => t ? new SampleToken(t) : null);
+    return db.getSampleToken(id).then(t => t ? new SampleToken(t) : null);
   },
 
   createToken: (args, ctx) => {
     const { db, id } = ctx;
 
-    return createSampleToken(db, id)
-      .then(t => new SampleToken(t));
+    return createSampleToken(db, id).then(t => new SampleToken(t));
   },
 };
 

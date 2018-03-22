@@ -30,12 +30,14 @@ const getSampleToken = id => new Promise((resolve, reject) => {
  * Put sample token in database
  * @param id
  * @param token
+ * @param hash
  */
-const putSampleToken = (id, token) => new Promise((resolve, reject) => {
+const putSampleToken = (id, token, hash) => new Promise((resolve, reject) => {
   console.log('putSampleToken()');
   const item = {
     id,
     token,
+    hash,
   };
   const params = {
     TableName: SAMPLE_TOKEN_TABLE,
