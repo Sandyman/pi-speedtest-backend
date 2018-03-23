@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const db = require('../db');
+const { decode } = require('../cipher');
 const github = require('../github');
 
 if (!process.env.GQL_SECRET) {
@@ -43,11 +44,10 @@ const authoriser = (event, context, callback) => {
       const id = payload.sub;
       return db.getAccessToken(id)
         .then(token => {
-          if (!token) {
-            return callback('No access token found');
-          }
+          if (!token) return callback('No access token found');
 
-          return github.requestUserObject(token.accessToken)
+          const accessToken = decode(process.env.AT_SECRET, token.accessToken);
+          return github.requestUserObject(accessToken)
             .then(() => callback(null, { principalId: id, policyDocument: policy }))
             .catch(err => {
               console.log(err);

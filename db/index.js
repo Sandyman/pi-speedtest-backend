@@ -90,11 +90,9 @@ const getUser = id => new Promise((resolve, reject) => {
 
 /**
  * Put access token in table
- * @param id
- * @param accessToken
+ * @param item
  */
-const putAccessToken = (id, accessToken) => new Promise((resolve, reject) => {
-  const item = { id, accessToken };
+const putAccessToken = (item) => new Promise((resolve, reject) => {
   const params = {
     TableName: ACCESS_TOKEN_TABLE,
     Item: item,

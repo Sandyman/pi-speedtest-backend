@@ -24,6 +24,7 @@ provider:
         - { "Fn::Join" : [ ":", [ "arn:aws:dynamodb:${self:provider.region}", { "Ref" : "AWS::AccountId" }, "table/${self:custom.sampleTokenTable}" ] ] }
   environment:
     ACCESS_TOKEN_TABLE: ${self:custom.accessTokenTable}
+    AT_SECRET: ${self:custom.config.AT_SECRET}
     CLIENT_ID: ${self:custom.config.CLIENT_ID}
     CLIENT_SECRET: ${self:custom.config.CLIENT_SECRET}
     GQL_SECRET: ${self:custom.config.GQL_SECRET}

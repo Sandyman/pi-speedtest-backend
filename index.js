@@ -1,4 +1,5 @@
 const authorizer = require('./auth/graphql');
+const { encode } = require('./cipher');
 const db = require('./db');
 const github = require('./github');
 const jwt = require('jsonwebtoken');
@@ -7,6 +8,7 @@ const moment = require('moment');
 const graphql = require('./graphql');
 const headers = require('./headers');
 
+const atSecret = process.env.AT_SECRET;
 const jwtSecret = process.env.JWT_SECRET;
 
 /**
@@ -62,12 +64,19 @@ const authGitHub = (event, context, cb) => {
           })
         })
     })
-    .then(user => db.putAccessToken(user.id, accessToken))
     .then(user => {
+      const encrypted = encode(atSecret, `${accessToken}`);
+      const item = {
+        id: user.id,
+        accessToken: encrypted,
+      };
+      return db.putAccessToken(item).then(() => user);
+    })
+    .then(({ id, fullname }) => {
       const claims = {
         iat: moment().unix(),
-        sub: user.id,
-        name: user.fullname,
+        sub: id,
+        name: fullname,
       };
       const token = jwt.sign(claims, jwtSecret);
       return cb(null, {
