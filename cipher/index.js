@@ -3,7 +3,7 @@ const crypto = require('crypto');
 /**
  * Decrypt
  */
-const decrypt = (secret, s) => {
+const decode = (secret, s) => {
   const decrypt = crypto.createDecipher('aes256', new Buffer(secret));
   let decrypted = decrypt.update(s, 'hex', 'utf8');
   decrypted += decrypt.final();
@@ -15,7 +15,7 @@ const decrypt = (secret, s) => {
  * @param secret
  * @param s
  */
-const encrypt = (secret, s) => {
+const encode = (secret, s) => {
   const encrypt = crypto.createCipher('aes256', new Buffer(secret));
   let encrypted = encrypt.update(s, 'utf8', 'hex');
   encrypted += encrypt.final('hex');
@@ -29,7 +29,7 @@ const encrypt = (secret, s) => {
 const hash = () => Math.random().toString(36).substring(2, 8).toUpperCase();
 
 module.exports = {
-  decrypt,
-  encrypt,
+  decode,
+  encode,
   hash,
 };
