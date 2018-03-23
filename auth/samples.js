@@ -1,4 +1,4 @@
-const crypto = require('crypto');
+const { decode } = require('../cipher');
 
 if (!process.env.JWT_SECRET) {
   console.log('Environment variable JWT_SECRET with secret key is required');
@@ -36,23 +36,23 @@ const authoriser = (event, context, callback) => {
 
   const token = authToken.replace(/^Bearer\s*/i, '');
 
-  const decrypt = crypto.createDecipher('aes256', new Buffer(process.env.JWT_SECRET));
-  let decrypted = decrypt.update(token, 'hex', 'utf8');
-  decrypted += decrypt.final();
+  try {
+    // XPI:<sub>:<hash>
+    const decrypted = decode(process.env.JWT_SECRET, token).split(':');
+    console.log(decrypted);
+    if (decrypted[0] !== 'XPI') return callback('Invalid token received');
 
-  // XPI:<sub>:<hash>
-  const ar = decrypted.split(':');
-  console.log(ar);
-  if (ar[0] !== 'XPI') return callback('Invalid token received');
-
-  const authResponse = {
-    principalId: ar[1],
-    context: {
-      hashKey: ar[2]
-    },
-    policyDocument: policy,
-  };
-  return callback(null, authResponse);
+    const authResponse = {
+      principalId: decrypted[1],
+      context: {
+        hashKey: decrypted[2]
+      },
+      policyDocument: policy,
+    };
+    return callback(null, authResponse);
+  } catch (e) {
+    return callback('Token decryption failed');
+  }
 };
 
 /**

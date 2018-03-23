@@ -1,17 +1,5 @@
-const crypto = require('crypto');
+const { encode, hash } = require('../cipher');
 const { Sample, SampleToken } = require('./sample');
-
-/**
- * Create a token
- * @param id
- * @param hash
- */
-const createToken = (id, hash) => {
-  const encrypt = crypto.createCipher('aes256', new Buffer(process.env.JWT_SECRET));
-  let encrypted = encrypt.update(`XPI:${id}:${hash}`, 'utf8', 'hex');
-  encrypted += encrypt.final('hex');
-  return encrypted;
-};
 
 /**
  * Create a token, or retrieve existing token
@@ -19,8 +7,7 @@ const createToken = (id, hash) => {
  * @param id
  */
 const createSampleToken = (db, id) => new Promise((resolve, reject) => {
-  const hash = Math.random().toString(36).substring(2, 8).toUpperCase();
-  const token = createToken(id, hash);
+  const token = encode(process.env.JWT_SECRET, `XPI:${id}:${hash()}`);
   return db.putSampleToken(id, token, hash).then(() => resolve({ token }));
 });
 
