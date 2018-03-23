@@ -7,14 +7,21 @@ const { Sample, SampleToken } = require('./sample');
  * @param id
  */
 const createSampleToken = (db, id) => new Promise((resolve, reject) => {
-  const token = encode(process.env.JWT_SECRET, `XPI:${id}:${hash()}`);
-  return db.putSampleToken(id, token, hash).then(() => resolve({ token }));
+  const hashKey = hash();
+  const token = encode(process.env.JWT_SECRET, `XPI:${id}:${hashKey}`);
+  return db.putSampleToken(id, token, hashKey).then(() => resolve({ token }));
 });
 
 /**
  * Root resolvers
  */
 const root = {
+  createToken: (args, ctx) => {
+    const { db, id } = ctx;
+
+    return createSampleToken(db, id).then(t => new SampleToken(t));
+  },
+
   getSamples: (args, ctx) => {
     const { db, id } = ctx;
     return db.getSamples(id).then(r => r.map(v => new Sample(v)));
@@ -24,12 +31,6 @@ const root = {
     const { db, id } = ctx;
 
     return db.getSampleToken(id).then(t => t ? new SampleToken(t) : null);
-  },
-
-  createToken: (args, ctx) => {
-    const { db, id } = ctx;
-
-    return createSampleToken(db, id).then(t => new SampleToken(t));
   },
 };
 
