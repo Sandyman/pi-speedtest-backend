@@ -11,6 +11,7 @@ provider:
   iamRoleStatements:
     - Effect: Allow
       Action:
+        - dynamodb:GetItem
         - dynamodb:PutItem
         - dynamodb:Query
       Resource:
