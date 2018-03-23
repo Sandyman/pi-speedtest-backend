@@ -3,8 +3,51 @@ const moment = require('moment');
 
 const dbClient = new AWS.DynamoDB.DocumentClient();
 
+const ACCESS_TOKEN_TABLE = process.env.ACCESS_TOKEN_TABLE;
 const SAMPLE_TABLE = process.env.SAMPLE_TABLE;
 const SAMPLE_TOKEN_TABLE = process.env.SAMPLE_TOKEN_TABLE;
+const USER_TABLE = process.env.USER_TABLE;
+
+/**
+ * Get access token from table
+ * @param id
+ */
+const getAccessToken = id => new Promise((resolve, reject) => {
+  console.log('getAccessToken()');
+  const params = {
+    TableName: ACCESS_TOKEN_TABLE,
+    Key: {
+      id,
+    }
+  };
+  console.log(JSON.stringify(params, null, 3));
+  dbClient.get(params, function(err, data) {
+    if (err) return reject(err);
+
+    return resolve(data.Item);
+  });
+});
+
+/**
+ * Get samples from database
+ * @param id
+ */
+const getSamples = id => new Promise((resolve, reject) => {
+  console.log('getSamples()');
+  const params = {
+    TableName: SAMPLE_TABLE,
+    KeyConditionExpression: 'id = :id',
+    ExpressionAttributeValues: {
+      ':id': id,
+    }
+  };
+  console.log(JSON.stringify(params, null, 3));
+  dbClient.query(params, function(err, data) {
+    if (err) return reject(err);
+
+    return resolve(data.Items);
+  });
+});
 
 /**
  * Get sample token
@@ -27,48 +70,40 @@ const getSampleToken = id => new Promise((resolve, reject) => {
 });
 
 /**
- * Put sample token in database
+ * Get user based on Id
  * @param id
- * @param token
- * @param hash
  */
-const putSampleToken = (id, token, hash) => new Promise((resolve, reject) => {
-  console.log('putSampleToken()');
-  const item = {
-    id,
-    token,
-    hash,
-  };
+const getUser = id => new Promise((resolve, reject) => {
   const params = {
-    TableName: SAMPLE_TOKEN_TABLE,
-    Item: item,
+    TableName: USER_TABLE,
+    Key: {
+      id,
+    }
   };
   console.log(JSON.stringify(params, null, 3));
-  dbClient.put(params, err => {
+  dbClient.get(params, (err, data) => {
     if (err) return reject(err);
 
-    return resolve(item);
+    return resolve(data.Item);
   });
 });
 
 /**
- * Get samples from database
+ * Put access token in table
  * @param id
+ * @param accessToken
  */
-const getSamples = id => new Promise((resolve, reject) => {
-  console.log('getSamples()');
+const putAccessToken = (id, accessToken) => new Promise((resolve, reject) => {
+  const item = { id, accessToken };
   const params = {
-    TableName: SAMPLE_TABLE,
-    KeyConditionExpression: 'id = :id',
-    ExpressionAttributeValues: {
-      ':id': id,
-    }
+    TableName: ACCESS_TOKEN_TABLE,
+    Item: item,
   };
   console.log(JSON.stringify(params, null, 3));
-  dbClient.query(params, function(err, data) {
+  dbClient.put(params, (err, data) => {
     if (err) return reject(err);
 
-    return resolve(data.Items);
+    return resolve(item);
   });
 });
 
@@ -99,9 +134,64 @@ const putSample = (id, sample) => new Promise((resolve, reject) => {
   });
 });
 
+/**
+ * Put sample token in database
+ * @param id
+ * @param token
+ * @param hash
+ */
+const putSampleToken = (id, token, hash) => new Promise((resolve, reject) => {
+  console.log('putSampleToken()');
+  const item = {
+    id,
+    token,
+    hash,
+  };
+  const params = {
+    TableName: SAMPLE_TOKEN_TABLE,
+    Item: item,
+  };
+  console.log(JSON.stringify(params, null, 3));
+  dbClient.put(params, err => {
+    if (err) return reject(err);
+
+    return resolve(item);
+  });
+});
+
+/**
+ * Create or update user in database table
+ * @param item
+ */
+const putUser = (item) => new Promise((resolve, reject) => {
+  const params = {
+    TableName: USER_TABLE,
+    Item: item,
+  };
+  console.log(JSON.stringify(params, null, 3));
+  dbClient.put(params, (err, data) => {
+    if (err) return reject(err);
+
+    return resolve(item);
+  });
+});
+
+/**
+ * Delete access token from table
+ * @param id
+ */
+const removeAccessToken = id => new Promise((resolve, reject) => {
+
+});
+
 module.exports = {
+  getAccessToken,
   getSamples,
   getSampleToken,
+  getUser,
+  putAccessToken,
   putSample,
   putSampleToken,
+  putUser,
+  removeAccessToken,
 };

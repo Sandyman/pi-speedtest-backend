@@ -23,6 +23,9 @@ provider:
         - { "Fn::Join" : [ ":", [ "arn:aws:dynamodb:${self:provider.region}", { "Ref" : "AWS::AccountId" }, "table/${self:custom.accessTokenTable}" ] ] }
         - { "Fn::Join" : [ ":", [ "arn:aws:dynamodb:${self:provider.region}", { "Ref" : "AWS::AccountId" }, "table/${self:custom.sampleTokenTable}" ] ] }
   environment:
+    ACCESS_TOKEN_TABLE: ${self:custom.accessTokenTable}
+    CLIENT_ID: ${self:custom.config.CLIENT_ID}
+    CLIENT_SECRET: ${self:custom.config.CLIENT_SECRET}
     GQL_SECRET: ${self:custom.config.GQL_SECRET}
     JWT_SECRET: ${self:custom.config.JWT_SECRET}
     SAMPLE_TABLE: ${self:custom.sampleTable}
@@ -30,6 +33,54 @@ provider:
     USER_TABLE: ${self:custom.userTable}
 
 functions:
+  #
+  # Authenticate user by requesting an access token from GitHub
+  #
+  authenticate:
+    handler: index.authGitHub
+    events:
+      - http:
+          path: auth/github
+          cors: true
+          method: get
+
+  #
+  # Logout by removing the current access token
+  #
+  logout:
+    handler: index.logout
+    events:
+      - http:
+          path: auth/logout
+          cors: true
+          method: get
+          authorizer: authorizer
+
+  #
+  # Single endpoint for all GraphQL related queries/mutations
+  #
+  graphql:
+    handler: index.graphql
+    events:
+      - http:
+          path: graphql
+          method: post
+          cors: true
+          authorizer: authorizer
+
+  #
+  # Authoriser function for user authorisation
+  #
+  authorizer:
+    handler: index.authorizer
+
+  ###################################################################
+  # The functions below are for posting samples only
+  ###################################################################
+
+  #
+  # Post measurement sample
+  #
   postSample:
     handler: samples.postSample
     events:
@@ -39,23 +90,17 @@ functions:
           method: post
           authorizer: sampleAuthorizer
 
-  graphql:
-    handler: index.graphql
-    events:
-      - http:
-          path: graphql
-          method: post
-          cors: true
-          authorizer: graphqlAuthorizer
-
   sampleAuthorizer:
     handler: samples.authorizer
 
-  graphqlAuthorizer:
-    handler: index.authorizer
-
+#
+# Resources (e.g., database tables)
+#
 resources:
   Resources:
+    #
+    # Access token table contains the access tokens for GitHub
+    #
     AccessTokenTable:
       Type: "AWS::DynamoDB::Table"
       Properties:
@@ -70,6 +115,9 @@ resources:
           ReadCapacityUnits: "1"
           WriteCapacityUnits: "1"
 
+    #
+    # Samples table contains the samples uploaded by the client
+    #
     SamplesTable:
       Type: "AWS::DynamoDB::Table"
       Properties:
@@ -91,6 +139,9 @@ resources:
           AttributeName: expires
           Enabled: true
 
+    #
+    # Sample token table contains the tokens needed for posting samples
+    #
     sampleTokenTable:
       Type: "AWS::DynamoDB::Table"
       Properties:
@@ -105,6 +156,9 @@ resources:
           ReadCapacityUnits: "1"
           WriteCapacityUnits: "1"
 
+    #
+    # User table contains the user objects
+    #
     UserTable:
       Type: "AWS::DynamoDB::Table"
       Properties:
@@ -119,6 +173,9 @@ resources:
           ReadCapacityUnits: "1"
           WriteCapacityUnits: "1"
 
+#
+# Custom section
+#
 custom:
   defaultStage: dev
   profiles:

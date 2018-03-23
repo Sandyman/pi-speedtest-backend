@@ -1,4 +1,6 @@
 const jwt = require('jsonwebtoken');
+const db = require('../db');
+const github = require('../github');
 
 if (!process.env.GQL_SECRET) {
   console.log('Environment variable JWT_SECRET with secret key is required');
@@ -38,7 +40,20 @@ const authoriser = (event, context, callback) => {
   const token = authToken.replace(/^Bearer\s*/i, '');
   return jwt.verify(token, secret, (err, payload) => {
     if (!err && payload) {
-      return callback(null, { principalId: payload.sub, policyDocument: policy });
+      const id = payload.sub;
+      return db.getAccessToken(id)
+        .then(token => {
+          if (!token) {
+            return callback('No access token found');
+          }
+
+          return github.requestUserObject(token.accessToken)
+            .then(() => callback(null, { principalId: id, policyDocument: policy }))
+            .catch(err => {
+              console.log(err);
+              return callback('Not logged into GitHub');
+            });
+        })
     }
     return callback(err);
   });
