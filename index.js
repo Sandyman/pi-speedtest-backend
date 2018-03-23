@@ -9,7 +9,7 @@ const graphql = require('./graphql');
 const headers = require('./headers');
 
 const atSecret = process.env.AT_SECRET;
-const jwtSecret = process.env.JWT_SECRET;
+const gqlSecret = process.env.GQL_SECRET;
 
 /**
  * Create a response (convenience function)
@@ -78,7 +78,7 @@ const authGitHub = (event, context, cb) => {
         sub: id,
         name: fullname,
       };
-      const token = jwt.sign(claims, jwtSecret);
+      const token = jwt.sign(claims, gqlSecret);
       return cb(null, {
         statusCode: 200,
         body: JSON.stringify({ token }),
