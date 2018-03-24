@@ -179,7 +179,18 @@ const putUser = (item) => new Promise((resolve, reject) => {
  * @param id
  */
 const removeAccessToken = id => new Promise((resolve, reject) => {
+  const params = {
+    TableName: ACCESS_TOKEN_TABLE,
+    Key: {
+      id,
+    }
+  };
+  console.log(JSON.stringify(params, null, 3));
+  dbClient.delete(params, (err, data) => {
+    if (err) return reject(err);
 
+    return resolve();
+  });
 });
 
 module.exports = {
