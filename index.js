@@ -109,7 +109,17 @@ const logout = (event, context, cb) => {
   const principalId = event.requestContext.authorizer.principalId;
   db.removeAccessToken(principalId)
     .catch(console.log)
-    .then(() => cb(null, response(200)));
+    .then(() => cb(null, {
+      statusCode: 200,
+      headers: {
+        'Access-Control-Allow-Credentials': true,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET,OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+        'Content-Type': 'application/json'
+      }
+    })
+  );
 };
 
 /**
