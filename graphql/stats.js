@@ -1,4 +1,8 @@
 const mean = (ar) => {
+  if (ar.length === 0) {
+    return 0;
+  }
+
   const sum = ar.reduce((a, c) => {
     a += c;
     return a;
@@ -38,6 +42,5 @@ class Stats {
 }
 
 module.exports = {
-  Stat,
   Stats,
 };
