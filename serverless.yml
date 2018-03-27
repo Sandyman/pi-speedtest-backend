@@ -39,6 +39,7 @@ functions:
   # Authenticate user by requesting an access token from GitHub
   #
   authenticate:
+    timeout: 10
     handler: index.authGitHub
     events:
       - http:
@@ -93,6 +94,7 @@ functions:
           authorizer: sampleAuthorizer
 
   sampleAuthorizer:
+    timeout: 10
     handler: samples.authorizer
 
 #
