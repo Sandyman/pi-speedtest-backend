@@ -12,6 +12,20 @@ const schema = buildSchema(`
     cc: String!
   }
   
+  type Stat {
+    min: Float!
+    max: Float!
+    mean: Float!
+    var: Float!
+    std: Float!
+  }
+  
+  type Stats {
+    download: Stat
+    upload: Stat
+    ping: Stat
+  }
+  
   type Token {
     token: String!
   }
@@ -19,6 +33,7 @@ const schema = buildSchema(`
   type Query {
     getLastSample: Sample
     getSamples: [Sample]
+    getStats: Stats
     getToken: Token
   }
   

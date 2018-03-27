@@ -1,5 +1,6 @@
 const { encode, hash } = require('../cipher');
 const { Sample, SampleToken } = require('./sample');
+const { Stats } = require('./stats');
 
 /**
  * Create a token, or retrieve existing token
@@ -13,30 +14,59 @@ const createSampleToken = (db, id) => new Promise((resolve, reject) => {
 });
 
 /**
- * Root resolvers
+ * Create token
+ * @param args
+ * @param ctx
  */
-const root = {
-  createToken: (args, ctx) => {
-    const { db, id } = ctx;
+const createToken = (args, ctx) => {
+  const { db, id } = ctx;
 
-    return createSampleToken(db, id).then(t => new SampleToken(t));
-  },
-
-  getLastSample: (args, ctx) => {
-    const { db, id } = ctx;
-    return db.getLastSample(id).then(t => t ? new Sample(t) : null);
-  },
-
-  getSamples: (args, ctx) => {
-    const { db, id } = ctx;
-    return db.getSamples(id).then(r => r.map(v => new Sample(v)));
-  },
-
-  getToken: (args, ctx) => {
-    const { db, id } = ctx;
-
-    return db.getSampleToken(id).then(t => t ? new SampleToken(t) : null);
-  },
+  return createSampleToken(db, id).then(t => new SampleToken(t));
 };
 
-module.exports = root;
+/**
+ * Get last sample (i.e., most recent)
+ * @param args
+ * @param ctx
+ */
+const getLastSample = (args, ctx) => {
+  const { db, id } = ctx;
+  return db.getLastSample(id).then(t => t ? new Sample(t) : null);
+};
+
+/**
+ * Get all samples
+ */
+const getSamples = (args, ctx) => {
+  const { db, id } = ctx;
+  return db.getSamples(id).then(r => r.map(v => new Sample(v)));
+};
+
+/**
+ * Get statistics
+ * @param args
+ * @param ctx
+ */
+const getStats = (args, ctx) => getSamples(args, ctx).then(r => new Stats(r));
+
+/**
+ * Get token
+ * @param args
+ * @param ctx
+ */
+const getToken = (args, ctx) => {
+  const { db, id } = ctx;
+
+  return db.getSampleToken(id).then(t => t ? new SampleToken(t) : null);
+};
+
+/**
+ * Root resolvers
+ */
+module.exports = {
+  createToken,
+  getLastSample,
+  getSamples,
+  getStats,
+  getToken,
+};
