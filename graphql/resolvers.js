@@ -22,6 +22,11 @@ const root = {
     return createSampleToken(db, id).then(t => new SampleToken(t));
   },
 
+  getLastSample: (args, ctx) => {
+    const { db, id } = ctx;
+    return db.getLastSample(id).then(t => t ? new Sample(t) : null);
+  },
+
   getSamples: (args, ctx) => {
     const { db, id } = ctx;
     return db.getSamples(id).then(r => r.map(v => new Sample(v)));

@@ -28,6 +28,25 @@ const getAccessToken = id => new Promise((resolve, reject) => {
   });
 });
 
+const getLastSample = (id) => new Promise((resolve, reject) => {
+  console.log('getLastSample()');
+  const params = {
+    TableName: SAMPLE_TABLE,
+    KeyConditionExpression: 'id = :id',
+    ExpressionAttributeValues: {
+      ':id': id,
+    },
+    Limit: 1,
+    ScanIndexForward: false,
+  };
+  console.log(JSON.stringify(params, null, 3));
+  dbClient.query(params, function(err, data) {
+    if (err) return reject(err);
+
+    return resolve(data.Items[0]);
+  });
+});
+
 /**
  * Get samples from database
  * @param id
@@ -195,6 +214,7 @@ const removeAccessToken = id => new Promise((resolve, reject) => {
 
 module.exports = {
   getAccessToken,
+  getLastSample,
   getSamples,
   getSampleToken,
   getUser,

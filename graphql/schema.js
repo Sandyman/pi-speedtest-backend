@@ -17,6 +17,7 @@ const schema = buildSchema(`
   }
   
   type Query {
+    getLastSample: Sample
     getSamples: [Sample]
     getToken: Token
   }
