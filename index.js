@@ -98,6 +98,46 @@ const authGitHub = (event, context, cb) => {
 };
 
 /**
+ * Delete user account
+ * @param event
+ * @param context
+ * @param cb
+ */
+const deleteUser = (event, context, cb) => {
+  console.log(JSON.stringify(event, null, 3));
+
+  const principalId = event.requestContext.authorizer.principalId;
+  const { sub } = event.pathParameters;
+  if (sub !== principalId) {
+    return cb(null, {
+      statusCode: 403,
+      body: JSON.stringify('403 Forbidden'),
+      headers: {
+        'Access-Control-Allow-Credentials': true,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'DELETE,OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+        'Content-Type': 'application/json',
+      }
+    })
+  }
+
+  console.log('This is where we should delete');
+
+  return cb(null, {
+    statusCode: 202,
+    body: JSON.stringify('202 Accepted'),
+    headers: {
+      'Access-Control-Allow-Credentials': true,
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'DELETE,OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+      'Content-Type': 'application/json',
+    }
+  })
+};
+
+/**
  * Logout user by removing current Access Token
  * @param event
  * @param context
@@ -149,6 +189,7 @@ const handler = (event, context, callback) => {
 module.exports = {
   authGitHub,
   authorizer,
+  deleteUser,
   graphql: handler,
   logout,
 };

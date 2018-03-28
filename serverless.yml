@@ -44,8 +44,8 @@ functions:
     events:
       - http:
           path: auth/github
-          cors: true
           method: get
+          cors: true
 
   #
   # Logout by removing the current access token
@@ -55,8 +55,20 @@ functions:
     events:
       - http:
           path: auth/logout
-          cors: true
           method: get
+          cors: true
+          authorizer: authorizer
+
+  #
+  # Delete account of the user that's currently "logged in" (based on token)
+  #
+  deleteUser:
+    handler: index.deleteUser
+    events:
+      - http:
+          path: user/{sub}
+          method: delete
+          cors: true
           authorizer: authorizer
 
   #
