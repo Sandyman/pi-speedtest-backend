@@ -8,7 +8,7 @@ node_modules
 .idea
 
 # We don't want to check in the configuration
-config.json
+config*.json
 
 # Joe backup files
 *~
