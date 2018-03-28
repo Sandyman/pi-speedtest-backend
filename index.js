@@ -36,7 +36,7 @@ const authGitHub = (event, context, cb) => {
   }
 
   const { code, state } = event.queryStringParameters;
-  if (!code || !state) {
+  if (!code || !state || code === 'undefined' || state === 'undefined') {
     console.log('Did not get code or state. Abort.');
     return cb(null, response(401));
   }
