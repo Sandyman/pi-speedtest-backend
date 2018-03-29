@@ -1,5 +1,6 @@
 {
   "accessTokenTable": "Pi-AccessTokens",
+  "cleanupTopic": "Pi-Cleanup-Topic",
   "sampleTable": "Pi-Samples",
   "sampleTokenTable": "Pi-SampleTokens",
   "userTable": "Pi-Users"

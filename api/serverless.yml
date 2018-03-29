@@ -12,18 +12,28 @@ provider:
   iamRoleStatements:
     - Effect: Allow
       Action:
-        - dynamodb:GetItem
         - dynamodb:PutItem
         - dynamodb:Query
-      Resource:
-        - { "Fn::Join" : [ ":", [ "arn:aws:dynamodb:${self:provider.region}", { "Ref" : "AWS::AccountId" }, "table/${self:custom.sampleTable}" ] ] }
-        - { "Fn::Join" : [ ":", [ "arn:aws:dynamodb:${self:provider.region}", { "Ref" : "AWS::AccountId" }, "table/${self:custom.userTable}" ] ] }
+      Resource: { "Fn::Join" : [ ":", [ "arn:aws:dynamodb:${self:provider.region}", { "Ref" : "AWS::AccountId" }, "table/${self:custom.sampleTable}" ] ] }
     - Effect: Allow
       Action:
-        - dynamodb:*
-      Resource:
-        - { "Fn::Join" : [ ":", [ "arn:aws:dynamodb:${self:provider.region}", { "Ref" : "AWS::AccountId" }, "table/${self:custom.accessTokenTable}" ] ] }
-        - { "Fn::Join" : [ ":", [ "arn:aws:dynamodb:${self:provider.region}", { "Ref" : "AWS::AccountId" }, "table/${self:custom.sampleTokenTable}" ] ] }
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+      Resource: { "Fn::Join" : [ ":", [ "arn:aws:dynamodb:${self:provider.region}", { "Ref" : "AWS::AccountId" }, "table/${self:custom.userTable}" ] ] }
+    - Effect: Allow
+      Action:
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:DeleteItem
+      Resource: { "Fn::Join" : [ ":", [ "arn:aws:dynamodb:${self:provider.region}", { "Ref" : "AWS::AccountId" }, "table/${self:custom.accessTokenTable}" ] ] }
+    - Effect: Allow
+      Action:
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+      Resource: { "Fn::Join" : [ ":", [ "arn:aws:dynamodb:${self:provider.region}", { "Ref" : "AWS::AccountId" }, "table/${self:custom.sampleTokenTable}" ] ] }
+    - Effect: Allow
+      Action: SNS:Publish
+      Resource: { "Fn::Join" : [":", ["arn:aws:sns:${self:provider.region}", { "Ref" : "AWS::AccountId" }, "${self:custom.cleanupTopic}" ] ] }
   environment:
     ACCESS_TOKEN_TABLE: ${self:custom.accessTokenTable}
     AT_SECRET: ${self:custom.config.AT_SECRET}
@@ -201,10 +211,11 @@ custom:
   postfixes:
     dev: "-dev"
     prod: "-prod"
-  common: ${file(./common.json)}
-  config: ${file(./config-${self:provider.stage}.json)}
+  common: ${file(../conf/common.json)}
+  config: ${file(../conf/config-${self:provider.stage}.json)}
   postfix: ${self:custom.postfixes.${self:provider.stage}}
   accessTokenTable: ${self:custom.common.accessTokenTable}${self:custom.postfix}
+  cleanupTopic: ${self:custom.common.cleanupTopic}${self:custom.postfix}
   sampleTable: ${self:custom.common.sampleTable}${self:custom.postfix}
   sampleTokenTable: ${self:custom.common.sampleTokenTable}${self:custom.postfix}
   userTable: ${self:custom.common.userTable}${self:custom.postfix}
