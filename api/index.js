@@ -1,9 +1,12 @@
+const AWS = require('aws-sdk');
 const authorizer = require('./auth/graphql');
 const { encode } = require('./cipher');
 const db = require('./db');
 const github = require('./github');
 const jwt = require('jsonwebtoken');
 const moment = require('moment');
+
+const sns = new AWS.SNS();
 
 const graphql = require('./graphql');
 const headers = require('./headers');
@@ -122,19 +125,27 @@ const deleteUser = (event, context, cb) => {
     })
   }
 
-  console.log('This is where we should delete');
+  const params = {
+    Message: JSON.stringify({ sub }),
+    Subject: `Delete account for user ${sub}`,
+    TopicArn: process.env.CLEANUP_TOPIC_ARN,
+  };
+  console.log(JSON.stringify(params, null, 3));
+  sns.publish(params, (err, data) => {
+    if (err) console.log(err);
 
-  return cb(null, {
-    statusCode: 202,
-    body: JSON.stringify('202 Accepted'),
-    headers: {
-      'Access-Control-Allow-Credentials': true,
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'DELETE,OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-      'Content-Type': 'application/json',
-    }
-  })
+    return cb(null, {
+      statusCode: 202,
+      body: JSON.stringify('202 Accepted'),
+      headers: {
+        'Access-Control-Allow-Credentials': true,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'DELETE,OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+        'Content-Type': 'application/json',
+      }
+    })
+  });
 };
 
 /**

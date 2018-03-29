@@ -33,10 +33,11 @@ provider:
       Resource: { "Fn::Join" : [ ":", [ "arn:aws:dynamodb:${self:provider.region}", { "Ref" : "AWS::AccountId" }, "table/${self:custom.sampleTokenTable}" ] ] }
     - Effect: Allow
       Action: SNS:Publish
-      Resource: { "Fn::Join" : [":", ["arn:aws:sns:${self:provider.region}", { "Ref" : "AWS::AccountId" }, "${self:custom.cleanupTopic}" ] ] }
+      Resource: ${self:custom.cleanupTopicArn}
   environment:
     ACCESS_TOKEN_TABLE: ${self:custom.accessTokenTable}
     AT_SECRET: ${self:custom.config.AT_SECRET}
+    CLEANUP_TOPIC_ARN: ${self:custom.cleanupTopicArn}
     CLIENT_ID: ${self:custom.config.CLIENT_ID}
     CLIENT_SECRET: ${self:custom.config.CLIENT_SECRET}
     GQL_SECRET: ${self:custom.config.GQL_SECRET}
@@ -216,6 +217,7 @@ custom:
   postfix: ${self:custom.postfixes.${self:provider.stage}}
   accessTokenTable: ${self:custom.common.accessTokenTable}${self:custom.postfix}
   cleanupTopic: ${self:custom.common.cleanupTopic}${self:custom.postfix}
+  cleanupTopicArn: { "Fn::Join" : [":", ["arn:aws:sns:${self:provider.region}", { "Ref" : "AWS::AccountId" }, "${self:custom.cleanupTopic}" ] ] }
   sampleTable: ${self:custom.common.sampleTable}${self:custom.postfix}
   sampleTokenTable: ${self:custom.common.sampleTokenTable}${self:custom.postfix}
   userTable: ${self:custom.common.userTable}${self:custom.postfix}

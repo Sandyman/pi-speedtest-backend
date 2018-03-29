@@ -11,12 +11,18 @@ provider:
   deploymentBucket: sls-depl-${self:provider.region}-${self:provider.stage}
   iamRoleStatements:
     - Effect: Allow
-      Action: dynamodb:*
+      Action:
+        - dynamodb:BatchWriteItem
       Resource:
-        - { "Fn::Join" : [ ":", [ "arn:aws:dynamodb:${self:provider.region}", { "Ref" : "AWS::AccountId" }, "table/${self:custom.sampleTable}" ] ] }
         - { "Fn::Join" : [ ":", [ "arn:aws:dynamodb:${self:provider.region}", { "Ref" : "AWS::AccountId" }, "table/${self:custom.userTable}" ] ] }
         - { "Fn::Join" : [ ":", [ "arn:aws:dynamodb:${self:provider.region}", { "Ref" : "AWS::AccountId" }, "table/${self:custom.accessTokenTable}" ] ] }
         - { "Fn::Join" : [ ":", [ "arn:aws:dynamodb:${self:provider.region}", { "Ref" : "AWS::AccountId" }, "table/${self:custom.sampleTokenTable}" ] ] }
+    - Effect: Allow
+      Action:
+        - dynamodb:BatchWriteItem
+        - dynamodb:Query
+      Resource:
+        - { "Fn::Join" : [ ":", [ "arn:aws:dynamodb:${self:provider.region}", { "Ref" : "AWS::AccountId" }, "table/${self:custom.sampleTable}" ] ] }
   environment:
     ACCESS_TOKEN_TABLE: ${self:custom.accessTokenTable}
     SAMPLE_TABLE: ${self:custom.sampleTable}
