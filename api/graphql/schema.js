@@ -30,11 +30,20 @@ const schema = buildSchema(`
     token: String!
   }
   
+  type UserInfo {
+    id: String!
+    avatarUrl: String
+    email: String!
+    fullname: String
+    username: String
+  }
+  
   type Query {
     getLastSample: Sample
     getSamples: [Sample]
     getStats: Stats
     getToken: Token
+    me: UserInfo
   }
   
   type Mutation {

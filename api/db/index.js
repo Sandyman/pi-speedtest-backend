@@ -109,7 +109,7 @@ const getUser = id => new Promise((resolve, reject) => {
 
 /**
  * Put access token in table
- * @param item
+2 * @param item
  */
 const putAccessToken = (item) => new Promise((resolve, reject) => {
   const params = {

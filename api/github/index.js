@@ -53,6 +53,7 @@ const requestUserObject = accessToken => new Promise((resolve, reject) => {
   console.log(JSON.stringify(options, null, 2));
   return request.get(options, (err, response, body) => {
     if (err) return reject(err);
+    console.log(JSON.stringify(response.headers, null, 3));
     if (response.statusCode && response.statusCode !== 200) {
       console.log(JSON.stringify(body, null, 3));
       console.log(`Error: ${response.statusCode}: ${response.statusMessage}`);

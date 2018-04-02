@@ -1,6 +1,7 @@
 const { encode, hash } = require('../cipher');
 const { Sample, SampleToken } = require('./sample');
 const { Stats } = require('./stats');
+const { UserInfo } = require('./user');
 
 /**
  * Create a token, or retrieve existing token
@@ -20,7 +21,6 @@ const createSampleToken = (db, id) => new Promise((resolve, reject) => {
  */
 const createToken = (args, ctx) => {
   const { db, id } = ctx;
-
   return createSampleToken(db, id).then(t => new SampleToken(t));
 };
 
@@ -56,8 +56,17 @@ const getStats = (args, ctx) => getSamples(args, ctx).then(r => new Stats(r));
  */
 const getToken = (args, ctx) => {
   const { db, id } = ctx;
-
   return db.getSampleToken(id).then(t => t ? new SampleToken(t) : null);
+};
+
+/**
+ * Get user info
+ * @param args
+ * @param ctx
+ */
+const getUserInfo = (args, ctx) => {
+  const { db, id } = ctx;
+  return db.getUser(id).then(u => new UserInfo(u));
 };
 
 /**
@@ -69,4 +78,5 @@ module.exports = {
   getSamples,
   getStats,
   getToken,
+  me: getUserInfo,
 };
