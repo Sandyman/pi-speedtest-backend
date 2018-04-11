@@ -4,7 +4,7 @@ const { decode } = require('../cipher');
 const github = require('../github');
 
 if (!process.env.GQL_SECRET) {
-  console.log('Environment variable JWT_SECRET with secret key is required');
+  console.log('Environment variable GQL_SECRET with secret key is required');
 }
 
 const secret = new Buffer(process.env.GQL_SECRET);
