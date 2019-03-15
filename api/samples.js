@@ -8,7 +8,7 @@ const headers = require('./headers');
  * @param context
  * @param callback
  */
-const postSample = (event, context, callback) => {
+const postSample = async (event, context, callback) => {
   console.log(JSON.stringify(event, null, 3));
 
   const { principalId, hashKey } = event.requestContext.authorizer;
@@ -16,34 +16,33 @@ const postSample = (event, context, callback) => {
 
   console.log(JSON.stringify(body, null, 3));
 
-  db.getSampleToken(principalId)
-    .then(t => {
-      if (t.hash !== hashKey) {
-        console.log('Invalid hash; probably an old token');
-        return callback(null, {
-          statusCode: 403,
-          body: JSON.stringify('Forbidden'),
-          headers,
-        });
-      }
+  try {
+    const { hash } = await db.getSampleToken(principalId);
+    if (hash !== hashKey) {
+      console.log('Invalid hash; probably an old token');
 
-      return db.putSample(principalId, body.data)
-        .then(() => {
-          return callback(null, {
-            statusCode: 200,
-            body: JSON.stringify('OK'),
-            headers,
-          });
-        })
-    })
-    .catch(err => {
-      console.log(err);
       return callback(null, {
-        statusCode: 400,
-        body: JSON.stringify('ERR'),
+        statusCode: 403,
+        body: JSON.stringify('Forbidden'),
         headers,
       });
+    }
+
+    await db.putSample(principalId, body.data);
+
+    return callback(null, {
+      statusCode: 200,
+      body: JSON.stringify('OK'),
+      headers,
     });
+  } catch (err) {
+    console.log(err);
+    return callback(null, {
+      statusCode: 400,
+      body: JSON.stringify('ERR'),
+      headers,
+    });
+  }
 };
 
 module.exports = {
