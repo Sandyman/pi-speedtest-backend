@@ -8,20 +8,22 @@ const { UserInfo } = require('./user');
  * @param db
  * @param id
  */
-const createSampleToken = (db, id) => new Promise((resolve, reject) => {
+const createSampleToken = async (db, id) => {
   const hashKey = hash();
   const token = encode(process.env.JWT_SECRET, `XPI:${id}:${hashKey}`);
-  return db.putSampleToken(id, token, hashKey).then(() => resolve({ token }));
-});
+  await db.putSampleToken(id, token, hashKey);
+  return token;
+};
 
 /**
  * Create token
  * @param args
  * @param ctx
  */
-const createToken = (args, ctx) => {
+const createToken = async (args, ctx) => {
   const { db, id } = ctx;
-  return createSampleToken(db, id).then(t => new SampleToken(t));
+  const token = await createSampleToken(db, id);
+  return new SampleToken(token);
 };
 
 /**
@@ -29,17 +31,19 @@ const createToken = (args, ctx) => {
  * @param args
  * @param ctx
  */
-const getLastSample = (args, ctx) => {
+const getLastSample = async (args, ctx) => {
   const { db, id } = ctx;
-  return db.getLastSample(id).then(t => t ? new Sample(t) : null);
+  const sample = await db.getLastSample(id);
+  return sample ? new Sample(sample) : null;
 };
 
 /**
  * Get all samples
  */
-const getSamples = (args, ctx) => {
+const getSamples = async (args, ctx) => {
   const { db, id } = ctx;
-  return db.getSamples(id).then(r => r.map(v => new Sample(v)));
+  const samples = await db.getSamples(id);
+  return samples.map(s => new Sample(s));
 };
 
 /**
@@ -47,16 +51,20 @@ const getSamples = (args, ctx) => {
  * @param args
  * @param ctx
  */
-const getStats = (args, ctx) => getSamples(args, ctx).then(r => new Stats(r));
+const getStats = async (args, ctx) => {
+  const samples = await getSamples(args, ctx);
+  return new Stats(samples);
+};
 
 /**
  * Get token
  * @param args
  * @param ctx
  */
-const getToken = (args, ctx) => {
+const getToken = async (args, ctx) => {
   const { db, id } = ctx;
-  return db.getSampleToken(id).then(t => t ? new SampleToken(t) : null);
+  const token = await db.getSampleToken(id);
+  return token ? new SampleToken(token) : null;
 };
 
 /**
@@ -64,9 +72,10 @@ const getToken = (args, ctx) => {
  * @param args
  * @param ctx
  */
-const getUserInfo = (args, ctx) => {
+const getUserInfo = async (args, ctx) => {
   const { db, id } = ctx;
-  return db.getUser(id).then(u => new UserInfo(u));
+  const user = await db.getUser(id);
+  return new UserInfo(user);
 };
 
 /**
