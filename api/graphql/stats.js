@@ -1,18 +1,7 @@
-const mean = (ar) => {
-  if (ar.length === 0) {
-    return 0;
-  }
-
-  const sum = ar.reduce((a, c) => {
-    a += c;
-    return a;
-  }, 0);
-  return sum / ar.length;
-};
-
+const mean = ar => ((ar.length > 0) ? ar.reduce((a, c) => (a + c), 0) / ar.length : 0);
 const variance = (ar, avg) => mean(ar.map(n => Math.pow(n - avg, 2)));
 
-const compact = (field) => (ar) => {
+const compact = field => ar => {
   console.log(ar);
   console.log(field);
   const iv = [];
