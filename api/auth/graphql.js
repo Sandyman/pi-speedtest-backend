@@ -29,7 +29,7 @@ const policy = {
  * @param context
  * @param callback
  */
-const authoriser = (event, context, callback) => {
+const authoriser = async (event, context, callback) => {
   console.log(JSON.stringify(event, null, 3));
 
   const authToken = event.authorizationToken;
@@ -39,24 +39,18 @@ const authoriser = (event, context, callback) => {
   if (!authToken.startsWith('Bearer')) return callback('Invalid authorization header');
 
   const token = authToken.replace(/^Bearer\s*/i, '');
-  return jwt.verify(token, secret, (err, payload) => {
-    if (!err && payload) {
-      const id = payload.sub;
-      return db.getAccessToken(id)
-        .then(token => {
-          if (!token) return callback('No access token found');
+  const payload = await jwt.verify(token, secret);
+  const id = payload.sub;
+  const accessToken = await db.getAccessToken(id);
+  if (!accessToken) return callback('No access token found');
 
-          const accessToken = decode(process.env.AT_SECRET, token.accessToken);
-          return github.requestUserObject(accessToken)
-            .then(() => callback(null, { principalId: id, policyDocument: policy }))
-            .catch(err => {
-              console.log(err);
-              return callback('Not logged into GitHub');
-            });
-        })
-    }
-    return callback(err);
-  });
+  const decodedToken = decode(process.env.AT_SECRET, accessToken.accessToken);
+  try {
+    await github.requestUserObject(decodedToken);
+    return callback(null, { principalId: id, policyDocument: policy });
+  } catch (err) {
+    return callback('Not logged into GitHub');
+  }
 };
 
 /**
