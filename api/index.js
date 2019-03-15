@@ -88,60 +88,6 @@ const authGitHub = async (event, context, cb) => {
     console.log(err);
     return cb(null, response(500));
   }
-
-
-  // return github.requestAccessToken(code, state)
-  //   .then(body => {
-  //     accessToken = body.access_token;
-  //     console.log(`Get access token: ${accessToken}`);
-  //     return github.requestUserObject(accessToken);
-  //   })
-  //   .then(userObject => {
-  //     const id = userObject.id.toString();
-  //     return db.getUser(id)
-  //       .then(user => {
-  //         if (user) return Promise.resolve(user);
-  //
-  //         return db.putUser({
-  //           id: userObject.id.toString(),
-  //           email: userObject.email,
-  //           username: userObject.login,
-  //           fullname: userObject.name,
-  //           avatarUrl: userObject.avatar_url,
-  //         })
-  //       })
-  //   })
-  //   .then(user => {
-  //     const encrypted = encode(atSecret, `${accessToken}`);
-  //     const item = {
-  //       id: user.id,
-  //       accessToken: encrypted,
-  //     };
-  //     return db.putAccessToken(item).then(() => user);
-  //   })
-  //   .then(({ id, fullname }) => {
-  //     const claims = {
-  //       iat: moment().unix(),
-  //       sub: id,
-  //       name: fullname,
-  //     };
-  //     const token = jwt.sign(claims, gqlSecret);
-  //     return cb(null, {
-  //       statusCode: 200,
-  //       body: JSON.stringify({ token }),
-  //       headers: {
-  //         'Access-Control-Allow-Credentials': true,
-  //         'Access-Control-Allow-Origin': '*',
-  //         'Access-Control-Allow-Methods': 'GET,OPTIONS',
-  //         'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-  //         'Content-Type': 'application/json'
-  //       }
-  //     })
-  //   })
-  //   .catch(e => {
-  //     console.log(e);
-  //     return cb(null, response(500))
-  //   });
 };
 
 /**
