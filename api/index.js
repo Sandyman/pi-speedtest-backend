@@ -96,7 +96,7 @@ const authGitHub = async (event, context, cb) => {
  * @param context
  * @param cb
  */
-const deleteUser = (event, context, cb) => {
+const deleteUser = async (event, context, cb) => {
   console.log(JSON.stringify(event, null, 3));
 
   const principalId = event.requestContext.authorizer.principalId;
@@ -120,21 +120,25 @@ const deleteUser = (event, context, cb) => {
     Subject: `Delete account for user ${sub}`,
     TopicArn: process.env.CLEANUP_TOPIC_ARN,
   };
-  console.log(JSON.stringify(params, null, 3));
-  sns.publish(params, (err, data) => {
-    if (err) console.log(err);
 
-    return cb(null, {
-      statusCode: 202,
-      body: JSON.stringify('202 Accepted'),
-      headers: {
-        'Access-Control-Allow-Credentials': true,
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'DELETE,OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-        'Content-Type': 'application/json',
-      }
-    })
+  console.log(JSON.stringify(params, null, 3));
+
+  try {
+    await sns.publish(params);
+  } catch (err) {
+    console.log(err);
+  }
+
+  return cb(null, {
+    statusCode: 202,
+    body: JSON.stringify('202 Accepted'),
+    headers: {
+      'Access-Control-Allow-Credentials': true,
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'DELETE,OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+      'Content-Type': 'application/json',
+    }
   });
 };
 
@@ -144,23 +148,27 @@ const deleteUser = (event, context, cb) => {
  * @param context
  * @param cb
  */
-const logout = (event, context, cb) => {
+const logout = async (event, context, cb) => {
   console.log(JSON.stringify(event, null, 3));
 
   const principalId = event.requestContext.authorizer.principalId;
-  db.removeAccessToken(principalId)
-    .catch(console.log)
-    .then(() => cb(null, {
-      statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Credentials': true,
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET,OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-        'Content-Type': 'application/json'
-      }
-    })
-  );
+
+  try {
+    await db.removeAccessToken(principalId)
+  } catch (err) {
+    console.log(err);
+  }
+
+  return cb(null, {
+    statusCode: 200,
+    headers: {
+      'Access-Control-Allow-Credentials': true,
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET,OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+      'Content-Type': 'application/json'
+    }
+  });
 };
 
 /**
