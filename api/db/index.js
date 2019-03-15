@@ -1,7 +1,6 @@
-const AWS = require('aws-sdk');
 const moment = require('moment');
 
-const dbClient = new AWS.DynamoDB.DocumentClient();
+const client = require('./client');
 
 const ACCESS_TOKEN_TABLE = process.env.ACCESS_TOKEN_TABLE;
 const SAMPLE_TABLE = process.env.SAMPLE_TABLE;
@@ -12,7 +11,7 @@ const USER_TABLE = process.env.USER_TABLE;
  * Get access token from table
  * @param id
  */
-const getAccessToken = id => new Promise((resolve, reject) => {
+const getAccessToken = async (id) => {
   console.log('getAccessToken()');
   const params = {
     TableName: ACCESS_TOKEN_TABLE,
@@ -21,14 +20,11 @@ const getAccessToken = id => new Promise((resolve, reject) => {
     }
   };
   console.log(JSON.stringify(params, null, 3));
-  dbClient.get(params, function(err, data) {
-    if (err) return reject(err);
+  const data = await client.get(params);
+  return data.Item;
+};
 
-    return resolve(data.Item);
-  });
-});
-
-const getLastSample = (id) => new Promise((resolve, reject) => {
+const getLastSample = async (id) => {
   console.log('getLastSample()');
   const params = {
     TableName: SAMPLE_TABLE,
@@ -40,18 +36,15 @@ const getLastSample = (id) => new Promise((resolve, reject) => {
     ScanIndexForward: false,
   };
   console.log(JSON.stringify(params, null, 3));
-  dbClient.query(params, function(err, data) {
-    if (err) return reject(err);
-
-    return resolve(data.Items[0]);
-  });
-});
+  const data = await client.query(params);
+  return data.Items[0];
+};
 
 /**
  * Get samples from database
  * @param id
  */
-const getSamples = id => new Promise((resolve, reject) => {
+const getSamples = async (id) => {
   console.log('getSamples()');
   const params = {
     TableName: SAMPLE_TABLE,
@@ -61,18 +54,15 @@ const getSamples = id => new Promise((resolve, reject) => {
     }
   };
   console.log(JSON.stringify(params, null, 3));
-  dbClient.query(params, function(err, data) {
-    if (err) return reject(err);
-
-    return resolve(data.Items);
-  });
-});
+  const data = await client.query(params);
+  return data.Items;
+};
 
 /**
  * Get sample token
  * @param id
  */
-const getSampleToken = id => new Promise((resolve, reject) => {
+const getSampleToken = async (id) => {
   console.log('getSampleToken()');
   const params = {
     TableName: SAMPLE_TOKEN_TABLE,
@@ -81,18 +71,15 @@ const getSampleToken = id => new Promise((resolve, reject) => {
     }
   };
   console.log(JSON.stringify(params, null, 3));
-  dbClient.get(params, function(err, data) {
-    if (err) return reject(err);
-
-    return resolve(data.Item);
-  });
-});
+  const data = await client.get(params);
+  return data.Item;
+};
 
 /**
  * Get user based on Id
  * @param id
  */
-const getUser = id => new Promise((resolve, reject) => {
+const getUser = async (id) => {
   const params = {
     TableName: USER_TABLE,
     Key: {
@@ -100,36 +87,30 @@ const getUser = id => new Promise((resolve, reject) => {
     }
   };
   console.log(JSON.stringify(params, null, 3));
-  dbClient.get(params, (err, data) => {
-    if (err) return reject(err);
-
-    return resolve(data.Item);
-  });
-});
+  const data = await client.get(params);
+  return data.Item;
+};
 
 /**
  * Put access token in table
  * @param item
  */
-const putAccessToken = (item) => new Promise((resolve, reject) => {
+const putAccessToken = async (item) => {
   const params = {
     TableName: ACCESS_TOKEN_TABLE,
     Item: item,
   };
   console.log(JSON.stringify(params, null, 3));
-  dbClient.put(params, (err, data) => {
-    if (err) return reject(err);
-
-    return resolve(item);
-  });
-});
+  await client.put(params);
+  return item;
+};
 
 /**
  * Put sample in database
  * @param id
  * @param sample
  */
-const putSample = (id, sample) => new Promise((resolve, reject) => {
+const putSample = async (id, sample) => {
   console.log('putSample()');
   const created = moment();
   const timestamp = created.toISOString();
@@ -144,12 +125,8 @@ const putSample = (id, sample) => new Promise((resolve, reject) => {
     }
   };
   console.log(JSON.stringify(params, null, 3));
-  dbClient.put(params, err => {
-    if (err) return reject(err);
-
-    return resolve();
-  });
-});
+  await client.put(params);
+};
 
 /**
  * Put sample token in database
@@ -157,7 +134,7 @@ const putSample = (id, sample) => new Promise((resolve, reject) => {
  * @param token
  * @param hash
  */
-const putSampleToken = (id, token, hash) => new Promise((resolve, reject) => {
+const putSampleToken = async (id, token, hash) => {
   console.log('putSampleToken()');
   const item = {
     id,
@@ -169,35 +146,29 @@ const putSampleToken = (id, token, hash) => new Promise((resolve, reject) => {
     Item: item,
   };
   console.log(JSON.stringify(params, null, 3));
-  dbClient.put(params, err => {
-    if (err) return reject(err);
-
-    return resolve(item);
-  });
-});
+  await client.put(params);
+  return item;
+};
 
 /**
  * Create or update user in database table
  * @param item
  */
-const putUser = (item) => new Promise((resolve, reject) => {
+const putUser = async (item) => {
   const params = {
     TableName: USER_TABLE,
     Item: item,
   };
   console.log(JSON.stringify(params, null, 3));
-  dbClient.put(params, (err, data) => {
-    if (err) return reject(err);
-
-    return resolve(item);
-  });
-});
+  await client.put(params);
+  return item;
+};
 
 /**
  * Delete access token from table
  * @param id
  */
-const removeAccessToken = id => new Promise((resolve, reject) => {
+const removeAccessToken = async (id) => {
   const params = {
     TableName: ACCESS_TOKEN_TABLE,
     Key: {
@@ -205,12 +176,8 @@ const removeAccessToken = id => new Promise((resolve, reject) => {
     }
   };
   console.log(JSON.stringify(params, null, 3));
-  dbClient.delete(params, (err, data) => {
-    if (err) return reject(err);
-
-    return resolve();
-  });
-});
+  await client.delete(params);
+};
 
 module.exports = {
   getAccessToken,
