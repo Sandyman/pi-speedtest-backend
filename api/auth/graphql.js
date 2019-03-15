@@ -38,18 +38,22 @@ const authoriser = async (event, context, callback) => {
   if (!authToken) return callback('No Authorization header');
   if (!authToken.startsWith('Bearer')) return callback('Invalid authorization header');
 
-  const token = authToken.replace(/^Bearer\s*/i, '');
-  const payload = await jwt.verify(token, secret);
-  const id = payload.sub;
-  const accessToken = await db.getAccessToken(id);
-  if (!accessToken) return callback('No access token found');
-
-  const decodedToken = decode(process.env.AT_SECRET, accessToken.accessToken);
   try {
-    await github.requestUserObject(decodedToken);
-    return callback(null, { principalId: id, policyDocument: policy });
+    const token = authToken.replace(/^Bearer\s*/i, '');
+    const payload = await jwt.verify(token, secret);
+    const id = payload.sub;
+    const accessToken = await db.getAccessToken(id);
+    if (!accessToken) return callback('No access token found');
+
+    const decodedToken = decode(process.env.AT_SECRET, accessToken.accessToken);
+    try {
+      await github.requestUserObject(decodedToken);
+      return callback(null, { principalId: id, policyDocument: policy });
+    } catch (err) {
+      return callback('Not logged into GitHub');
+    }
   } catch (err) {
-    return callback('Not logged into GitHub');
+    return callback(err);
   }
 };
 
