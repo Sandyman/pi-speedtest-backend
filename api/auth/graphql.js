@@ -7,7 +7,7 @@ if (!process.env.GQL_SECRET) {
   console.log('Environment variable GQL_SECRET with secret key is required');
 }
 
-const secret = new Buffer(process.env.GQL_SECRET);
+const secret = Buffer.from(process.env.GQL_SECRET);
 const region = process.env.REGION || '*';
 const apiId = process.env.API_ID || '*';
 const stageId = process.env.STAGE_ID || '*';
